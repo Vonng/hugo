@@ -20,7 +20,8 @@ import (
 
 	"github.com/gohugoio/hugo/config"
 	"github.com/miekg/mmark"
-	"github.com/russross/blackfriday"
+	"github.com/Vonng/blackfriday"
+	"io"
 )
 
 // HugoHTMLRenderer wraps a blackfriday.Renderer, typically a blackfriday.Html
@@ -31,67 +32,76 @@ type HugoHTMLRenderer struct {
 	blackfriday.Renderer
 }
 
+func (r *HugoHTMLRenderer) RenderNode(w io.Writer, node *blackfriday.Node, entering bool) blackfriday.WalkStatus {
+	switch node.Type {
+	case blackfriday.CodeBlock:
+	case blackfriday.List:
+	case blackfriday.Item:
+	}
+	return r.Renderer.RenderNode(w, node, entering)
+}
+
 // BlockCode renders a given text as a block of code.
 // Pygments is used if it is setup to handle code fences.
-func (r *HugoHTMLRenderer) BlockCode(out *bytes.Buffer, text []byte, lang string) {
-	if r.Cfg.GetBool("pygmentsCodeFences") && (lang != "" || r.Cfg.GetBool("pygmentsCodeFencesGuessSyntax")) {
-		opts := r.Cfg.GetString("pygmentsOptions")
-		str := strings.Trim(html.UnescapeString(string(text)), "\n\r")
-		highlighted, _ := r.cs.Highlight(str, lang, opts)
-		out.WriteString(highlighted)
-	} else {
-		r.Renderer.BlockCode(out, text, lang)
-	}
-}
-
-// ListItem adds task list support to the Blackfriday renderer.
-func (r *HugoHTMLRenderer) ListItem(out *bytes.Buffer, text []byte, flags int) {
-	if !r.Config.TaskLists {
-		r.Renderer.ListItem(out, text, flags)
-		return
-	}
-
-	switch {
-	case bytes.HasPrefix(text, []byte("[ ] ")):
-		text = append([]byte(`<label><input type="checkbox" disabled class="task-list-item">`), text[3:]...)
-		text = append(text, []byte(`</label>`)...)
-
-	case bytes.HasPrefix(text, []byte("[x] ")) || bytes.HasPrefix(text, []byte("[X] ")):
-		text = append([]byte(`<label><input type="checkbox" checked disabled class="task-list-item">`), text[3:]...)
-		text = append(text, []byte(`</label>`)...)
-	}
-
-	r.Renderer.ListItem(out, text, flags)
-}
-
-// List adds task list support to the Blackfriday renderer.
-func (r *HugoHTMLRenderer) List(out *bytes.Buffer, text func() bool, flags int) {
-	if !r.Config.TaskLists {
-		r.Renderer.List(out, text, flags)
-		return
-	}
-	marker := out.Len()
-	r.Renderer.List(out, text, flags)
-	if out.Len() > marker {
-		list := out.Bytes()[marker:]
-		if bytes.Contains(list, []byte("task-list-item")) {
-			// Find the index of the first >, it might be 3 or 4 depending on whether
-			// there is a new line at the start, but this is safer than just hardcoding it.
-			closingBracketIndex := bytes.Index(list, []byte(">"))
-			// Rewrite the buffer from the marker
-			out.Truncate(marker)
-			// Safely assuming closingBracketIndex won't be -1 since there is a list
-			// May be either dl, ul or ol
-			list := append(list[:closingBracketIndex], append([]byte(` class="task-list"`), list[closingBracketIndex:]...)...)
-			out.Write(list)
-		}
-	}
-}
+//func (r *HugoHTMLRenderer) BlockCode(out *bytes.Buffer, text []byte, lang string) {
+//	if r.Cfg.GetBool("pygmentsCodeFences") && (lang != "" || r.Cfg.GetBool("pygmentsCodeFencesGuessSyntax")) {
+//		opts := r.Cfg.GetString("pygmentsOptions")
+//		str := strings.Trim(html.UnescapeString(string(text)), "\n\r")
+//		highlighted, _ := r.cs.Highlight(str, lang, opts)
+//		out.WriteString(highlighted)
+//	} else {
+//		r.Renderer.BlockCode(out, text, lang)
+//	}
+//}
+//
+//// ListItem adds task list support to the Blackfriday renderer.
+//func (r *HugoHTMLRenderer) listItem(out *bytes.Buffer, text []byte, flags int) {
+//	if !r.Config.TaskLists {
+//		r.Renderer.ListItem(out, text, flags)
+//		return
+//	}
+//
+//	switch {
+//	case bytes.HasPrefix(text, []byte("[ ] ")):
+//		text = append([]byte(`<label><input type="checkbox" disabled class="task-list-item">`), text[3:]...)
+//		text = append(text, []byte(`</label>`)...)
+//
+//	case bytes.HasPrefix(text, []byte("[x] ")) || bytes.HasPrefix(text, []byte("[X] ")):
+//		text = append([]byte(`<label><input type="checkbox" checked disabled class="task-list-item">`), text[3:]...)
+//		text = append(text, []byte(`</label>`)...)
+//	}
+//
+//	r.Renderer.ListItem(out, text, flags)
+//}
+//
+//// List adds task list support to the Blackfriday renderer.
+//func (r *HugoHTMLRenderer) List(out *bytes.Buffer, text func() bool, flags int) {
+//	if !r.Config.TaskLists {
+//		r.Renderer.List(out, text, flags)
+//		return
+//	}
+//	marker := out.Len()
+//	r.Renderer.List(out, text, flags)
+//	if out.Len() > marker {
+//		list := out.Bytes()[marker:]
+//		if bytes.Contains(list, []byte("task-list-item")) {
+//			// Find the index of the first >, it might be 3 or 4 depending on whether
+//			// there is a new line at the start, but this is safer than just hardcoding it.
+//			closingBracketIndex := bytes.Index(list, []byte(">"))
+//			// Rewrite the buffer from the marker
+//			out.Truncate(marker)
+//			// Safely assuming closingBracketIndex won't be -1 since there is a list
+//			// May be either dl, ul or ol
+//			list := append(list[:closingBracketIndex], append([]byte(` class="task-list"`), list[closingBracketIndex:]...)...)
+//			out.Write(list)
+//		}
+//	}
+//}
 
 // HugoMmarkHTMLRenderer wraps a mmark.Renderer, typically a mmark.html,
 // enabling Hugo to customise the rendering experience.
 type HugoMmarkHTMLRenderer struct {
-	cs *ContentSpec
+	cs  *ContentSpec
 	mmark.Renderer
 	Cfg config.Provider
 }

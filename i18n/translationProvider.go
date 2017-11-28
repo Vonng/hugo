@@ -20,7 +20,7 @@ import (
 	"github.com/gohugoio/hugo/deps"
 	"github.com/gohugoio/hugo/source"
 	"github.com/nicksnyder/go-i18n/i18n/bundle"
-	"github.com/nicksnyder/go-i18n/i18n/language"
+	//"github.com/nicksnyder/go-i18n/i18n/language"
 )
 
 // Unfortunately this needs to be global, see
@@ -65,8 +65,8 @@ func (tp *TranslationProvider) Update(d *deps.Deps) error {
 	}
 	// We need to register all language codes as "plural spec" to prevent errors with unknown language codes.
 	// see https://github.com/gohugoio/hugo/issues/3564
-	ps := &language.PluralSpec{}
-	language.RegisterPluralSpec(langs, ps)
+	//ps := &language.PluralSpec{}
+	//language.RegisterPluralSpec(langs, ps)
 
 	for _, currentSource := range sources {
 		for _, r := range currentSource.Files() {

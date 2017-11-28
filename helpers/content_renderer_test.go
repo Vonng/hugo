@@ -23,14 +23,14 @@ import (
 )
 
 // Renders a codeblock using Blackfriday
-func (c ContentSpec) render(input string) string {
-	ctx := &RenderingContext{Cfg: c.cfg, Config: c.NewBlackfriday()}
-	render := c.getHTMLRenderer(0, ctx)
-
-	buf := &bytes.Buffer{}
-	render.BlockCode(buf, []byte(input), "html")
-	return buf.String()
-}
+//func (c ContentSpec) render(input string) string {
+//	ctx := &RenderingContext{Cfg: c.cfg, Config: c.NewBlackfriday()}
+//	render := c.getHTMLRenderer(0, ctx)
+//
+//	buf := &bytes.Buffer{}
+//	render.BlockCode(buf, []byte(input), "html")
+//	return buf.String()
+//}
 
 // Renders a codeblock using Mmark
 func (c ContentSpec) renderWithMmark(input string) string {
@@ -67,7 +67,7 @@ func TestCodeFence(t *testing.T) {
 			c, err := NewContentSpec(v)
 			assert.NoError(err)
 
-			result := c.render(d.input)
+			result := "fuck" //c.render(d.input)
 
 			expectedRe, err := regexp.Compile(d.expected)
 
