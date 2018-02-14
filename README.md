@@ -1,3 +1,42 @@
+## Hugo with MathJax Support
+
+Hugo is great, except for it's Math support.
+
+so I fix it, no more ugly work around, just like typora & pandoc
+
+### Pre compiled binary
+
+Make life easy, Just use binary%
+
+* [MacOS]：[hugo.darwin](release/hugo.darwin)
+* [Linux]：[hugo.linux](hugo.linux)
+
+
+
+### If you want build yourself
+
+You will need another modified project [`blackfriday`](https://github.com/Vonng/blackfriday)
+
+While they didn't t accept my PR, and I don't want to change every
+
+```django
+import "github.com/gohugoio/hugo/xxx"
+```
+
+to
+
+```go
+import "github.com/Vonng/hugo/xxx"
+```
+
+You will need to replace  `$GOPATH/src/gohugoio/hugo`  with this directory before building
+
+-----------
+
+
+
+
+
 ![Hugo](https://raw.githubusercontent.com/gohugoio/hugoDocs/master/static/img/hugo-logo.png)
 
 A Fast and Flexible Static Site Generator built with love by [spf13](http://spf13.com/) and [friends](https://github.com/gohugoio/hugo/graphs/contributors) in [Go][].
@@ -63,7 +102,7 @@ Once the `get` completes, you should find your new `hugo` (or `hugo.exe`) execut
 To update Hugo’s dependencies, use `go get` with the `-u` option.
 
     go get -u -v github.com/gohugoio/hugo
-	
+
 ## The Hugo Documentation
 
 The Hugo documentation now lives in its own repository, see https://github.com/gohugoio/hugoDocs. But we do keep a version of that documentation as a `git subtree` in this repository. To build the sub folder `/docs` as a Hugo site, you need to clone this repo:
